@@ -1,14 +1,14 @@
 /** @jsx jsx */
 import { jsx } from '@emotion/core';
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { getClientPosition } from './utils';
 import defaultStyles from './styles';
 
 const Slider = ({
   disabled,
   axis,
-  x,
-  y,
+  x = 0,
+  y = 0,
   xmin,
   xmax,
   ymin,
@@ -24,6 +24,7 @@ const Slider = ({
   onThumbDoubleClick,
   xreverse,
   yreverse,
+  withLabel = false,
   styles: customStyles,
   ...props
 }) => {
@@ -31,6 +32,12 @@ const Slider = ({
   const handle = useRef(null);
   const start = useRef({});
   const offset = useRef({});
+
+  const [value, setValue] = useState({xValue: x, yValue: y});
+
+  useEffect(() => {
+    setValue({xValue: x, yValue: y});
+  }, [x, y]);
 
   function getPosition() {
     let top = ((y - ymin) / (ymax - ymin)) * 100;
@@ -70,9 +77,12 @@ const Slider = ({
     const x = (dx !== 0 ? parseInt(dx / xstep, 10) * xstep : 0) + xmin;
     const y = (dy !== 0 ? parseInt(dy / ystep, 10) * ystep : 0) + ymin;
 
+    const xValue = xreverse ? xmax - x + xmin : x;
+    const yValue = yreverse ? ymax - y + ymin : y;
+    setValue({xValue, yValue});
     onChange({
-      x: xreverse ? xmax - x + xmin : x,
-      y: yreverse ? ymax - y + ymin : y
+      x: xValue,
+      y: yValue,
     });
   }
 
@@ -157,11 +167,6 @@ const Slider = ({
     handleClick(e);
   }
 
-  // on thumb (element) click 
-  function handleThumbClick(e) {
-    if (onThumbClick) onThumbClick(e);
-  }
-
   // on thumb (element) double-click
   function handleThumbDoubleClick(e) {
     if (onThumbDoubleClick) onThumbDoubleClick(e);
@@ -181,17 +186,27 @@ const Slider = ({
     top: yreverse ? 100 - pos.top + '%' : pos.top + '%'
   };
 
+  const labelStyle = {
+    position: 'absolute',
+    transform: 'translate(-50%, -50%)',
+    left: xreverse ? 100 - pos.left + '%' : pos.left + '%',
+    top: yreverse ? 100 - pos.top + '%' : pos.top + '%'
+  };
+
   if (axis === 'x') {
     handleStyle.top = '50%';
+    labelStyle.top =  '50%';
   } else if (axis === 'y') {
     handleStyle.left = '50%';
+    labelStyle.left  = '50%';
   }
 
   const styles = {
     track: { ...defaultStyles[axis].track, ...customStyles.track },
     active: { ...defaultStyles[axis].active, ...customStyles.active },
     thumb: { ...defaultStyles[axis].thumb, ...customStyles.thumb },
-    disabled: { ...defaultStyles.disabled, ...customStyles.disabled }
+    label: { ...defaultStyles[axis].label, ...customStyles.label },
+    disabled: { ...defaultStyles.disabled, ...customStyles.disabled },
   };
 
   return (
@@ -214,6 +229,13 @@ const Slider = ({
       >
         <div css={styles.thumb} onDoubleClick={handleThumbDoubleClick} />
       </div>
+      <div
+        style={{...labelStyle, ...styles.label}}
+      >
+      {withLabel && (
+        <div>{(axis === 'xy') ? `${value.xValue},${value.yValue}` : ((axis === 'x') ? `${value.xValue}` : `${value.yValue}`)}</div>
+      )}
+      </div>
     </div>
   );
 };
@@ -231,6 +253,7 @@ Slider.defaultProps = {
   ystep: 1,
   xreverse: false,
   yreverse: false,
+  withLabel: false,
   styles: {}
 };
 

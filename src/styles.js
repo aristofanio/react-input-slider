@@ -29,6 +29,13 @@ const thumb = {
   boxSizing: 'border-box'
 };
 
+const label = {
+  position: 'relative',
+  display: 'block',
+  content: '""',
+  userSelect: 'none',
+};
+
 const styles = {
   x: {
     track: {
@@ -45,6 +52,10 @@ const styles = {
 
     thumb: {
       ...thumb
+    },
+
+    label: {
+      ...label
     }
   },
 
@@ -63,6 +74,10 @@ const styles = {
 
     thumb: {
       ...thumb
+    },
+
+    label: {
+      ...label
     }
   },
 
@@ -80,6 +95,10 @@ const styles = {
 
     thumb: {
       ...thumb
+    },
+
+    label: {
+      ...label
     }
   },
 
